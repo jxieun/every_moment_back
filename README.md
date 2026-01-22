@@ -25,6 +25,7 @@
 - **Timezone**: Asia/Seoul(KST) 기본 타임존 설정으로 시간 표기 오류 수정
 - **Null Handler**: MatchScorerService Integer null 처리로 NullPointerException 방지
 - **Auto Room Assignment**: 설문 층고 선호도 기반 자동 호실 배정 구현 (1층=101~, 2층=201~, 3층=301~)
+- **SWAP Approval Logic**: 스왑 승인 시 기존 매칭 및 호실 자동 초기화 구현
 
 ---
 
