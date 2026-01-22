@@ -26,6 +26,8 @@ public class PostService {
     private final PostRepository postRepository;
     private final CommentRepository commentRepository;
     private final UserService userService;
+    private final com.rookies4.every_moment.match.repository.MatchRepository matchRepository;
+    private final com.rookies4.every_moment.repository.UserRepository userRepository;
 
     private boolean isAdmin(UserEntity u) {
         return u != null && "ROLE_ADMIN".equals(u.getRole());
@@ -78,8 +80,7 @@ public class PostService {
                         c.getContent(),
                         c.getAuthor().getId(),
                         c.getAuthor().getUsername(),
-                        c.getCreatedAt()
-                ))
+                        c.getCreatedAt()))
                 .toList();
 
         return new PostDetail(
@@ -92,8 +93,7 @@ public class PostService {
                 p.getAuthor().getId(),
                 p.getAuthor().getUsername(),
                 p.getStatus(),
-                comments
-        );
+                comments);
     }
 
     // 엔티티 로딩
@@ -134,8 +134,10 @@ public class PostService {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "수정 권한이 없습니다.");
         }
 
-        if (title != null && !title.isBlank()) p.setTitle(title);
-        if (content != null && !content.isBlank()) p.setContent(content);
+        if (title != null && !title.isBlank())
+            p.setTitle(title);
+        if (content != null && !content.isBlank())
+            p.setContent(content);
 
         if (category != null && !category.isBlank()) {
             if (!ALLOWED.contains(category)) {
@@ -154,15 +156,49 @@ public class PostService {
         return detail(id);
     }
 
-    // 관리자 승인 → 매칭 가능
+    // 관리자 승인 → 기존 매칭 초기화 후 재매칭 가능
     @Transactional
     public PostDetail approveSwap(Long postId, UserEntity admin) {
         if (!isAdmin(admin)) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "관리자 권한 필요");
         }
         var post = getPostEntity(postId);
+        UserEntity swapRequester = post.getAuthor();
+
+        // 🔥 기존 매칭 초기화
+        resetExistingMatch(swapRequester);
+
+        // 게시글 상태 변경
         post.setStatus("SWAP_APPROVED");
         return detail(postId);
+    }
+
+    /**
+     * 기존 매칭 및 호실 초기화
+     */
+    private void resetExistingMatch(UserEntity user) {
+        // 1. 사용자의 ACCEPTED 매칭 찾기
+        var acceptedMatches = matchRepository.findByUserAndStatus(
+                user, com.rookies4.every_moment.match.entity.MatchStatus.ACCEPTED);
+
+        for (var match : acceptedMatches) {
+            // 2. 매칭 상태를 REJECTED로 변경
+            match.setStatus(com.rookies4.every_moment.match.entity.MatchStatus.REJECTED);
+            matchRepository.save(match);
+
+            // 3. 두 유저의 호실 번호 초기화
+            UserEntity user1 = match.getUser1();
+            UserEntity user2 = match.getUser2();
+
+            if (user1 != null) {
+                user1.setRoomNumber(null);
+                userRepository.save(user1);
+            }
+            if (user2 != null) {
+                user2.setRoomNumber(null);
+                userRepository.save(user2);
+            }
+        }
     }
 
     // 관리자 거절 → 매칭 불가
