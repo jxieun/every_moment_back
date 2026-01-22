@@ -1,6 +1,5 @@
 package com.rookies4.every_moment.exception;
 
-
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
 import jakarta.validation.ConstraintViolationException;
@@ -68,11 +67,10 @@ public class GlobalExceptionHandler {
             }
             t = t.getCause();
         }
-        boolean emailHit =
-                (constraint != null && constraint.equalsIgnoreCase("uk_users_email"))
-                        || lower.contains("uk_users_email")
-                        || lower.contains("for key 'uk_users_email'")
-                        || lower.contains("email"); // 드라이버 메시지 백업 매칭
+        boolean emailHit = (constraint != null && constraint.equalsIgnoreCase("uk_users_email"))
+                || lower.contains("uk_users_email")
+                || lower.contains("for key 'uk_users_email'")
+                || lower.contains("email"); // 드라이버 메시지 백업 매칭
 
         if (emailHit) {
             var body = ApiErrorResponse.of(ErrorCode.DUPLICATE_EMAIL, "email", null);
@@ -85,6 +83,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(RuntimeException.class)
     public ResponseEntity<ApiErrorResponse> handleGeneric(RuntimeException ex) {
+        ex.printStackTrace(); // 서버 로그에 스택 트레이스 출력
         var body = ApiErrorResponse.of(ErrorCode.INTERNAL_SERVER_ERROR, null, ex.getMessage());
         return ResponseEntity.status(ErrorCode.INTERNAL_SERVER_ERROR.status).body(body);
     }
