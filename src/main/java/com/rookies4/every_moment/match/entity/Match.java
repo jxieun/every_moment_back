@@ -32,17 +32,17 @@ public class Match {
     private UserEntity user2;
 
     @Column(nullable = false)
-    private Integer user1_Score;  // user1의 점수
+    private Integer user1_Score; // user1의 점수
 
     @Column(nullable = false)
-    private Integer user2_Score;  // user2의 점수
+    private Integer user2_Score; // user2의 점수
 
     @Column(nullable = false)
-    private Double similarityScore;  // 유사도 점수 추가
+    private Double similarityScore; // 유사도 점수 추가
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private MatchStatus status;  // 매칭 상태 (PENDING, ACCEPTED, REJECTED 등)
+    private MatchStatus status; // 매칭 상태 (PENDING, ACCEPTED, REJECTED 등)
 
     @CreatedDate
     @Column(name = "created_at", nullable = false, updatable = false)
@@ -51,4 +51,18 @@ public class Match {
     @LastModifiedDate
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
+
+    @PrePersist
+    public void prePersist() {
+        LocalDateTime now = LocalDateTime.now();
+        if (createdAt == null)
+            createdAt = now;
+        if (updatedAt == null)
+            updatedAt = now;
+    }
+
+    @PreUpdate
+    public void preUpdate() {
+        updatedAt = LocalDateTime.now();
+    }
 }
