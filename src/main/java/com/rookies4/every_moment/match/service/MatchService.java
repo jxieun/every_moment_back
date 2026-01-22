@@ -78,14 +78,14 @@ public class MatchService {
 
         // 이미 두 사용자 사이(PENDING) 매칭 존재하면 예외 발생
         if (matchRepository.existsPendingMatchBetweenUsers(proposer.getId(), targetUser.getId(), MatchStatus.PENDING)) {
-            throw new IllegalArgumentException("이미 " + proposer.getUsername() + "와 " + targetUser.getUsername() + " 간에는 제안된 매칭이 있습니다.");
+            throw new IllegalArgumentException(
+                    "이미 " + proposer.getUsername() + "와 " + targetUser.getUsername() + " 간에는 제안된 매칭이 있습니다.");
         }
 
-
         SurveyResult user1Survey = surveyResultRepository.findByUserId(proposer.getId())
-                .orElseThrow(() -> new IllegalArgumentException("사용자 1의 설문 결과가 없습니다."));
+                .orElseGet(() -> createDefaultSurveyResult(proposer));
         SurveyResult user2Survey = surveyResultRepository.findByUserId(targetUser.getId())
-                .orElseThrow(() -> new IllegalArgumentException("사용자 2의 설문 결과가 없습니다."));
+                .orElseGet(() -> createDefaultSurveyResult(targetUser));
 
         Match match = new Match();
         match.setUser1(proposer);
@@ -127,7 +127,6 @@ public class MatchService {
                     matchRepository.existsAcceptedMatchForUser(match.getUser2().getId(), MatchStatus.ACCEPTED)) {
                 throw new IllegalArgumentException("매칭된 사용자는 이미 다른 매칭을 수락했습니다.");
             }
-
 
             // 현재 사용자가 이미 수락한 매칭이 있는지 확인 (user1이 수락된 매칭을 가지고 있으면, 수락 불가)
             if (matchRepository.existsByUser1AndStatus(match.getUser1().getId(), MatchStatus.ACCEPTED)) {
@@ -248,5 +247,16 @@ public class MatchService {
         }
 
         throw new IllegalArgumentException("스왑 신청이 완료된 매칭만 새로운 매칭을 제안할 수 있습니다.");
+    }
+
+    private SurveyResult createDefaultSurveyResult(UserEntity user) {
+        SurveyResult defaultSurvey = new SurveyResult();
+        defaultSurvey.setUser(user);
+        defaultSurvey.setSleepTime(0);
+        defaultSurvey.setCleanliness(0);
+        defaultSurvey.setNoiseSensitivity(0);
+        defaultSurvey.setHeight(0);
+        defaultSurvey.setRoomTemp(0);
+        return defaultSurvey;
     }
 }
