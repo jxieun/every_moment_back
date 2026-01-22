@@ -15,6 +15,11 @@ public class EveryMomentApplication {
         SpringApplication.run(EveryMomentApplication.class, args);
     }
 
+    @jakarta.annotation.PostConstruct
+    public void init() {
+        java.util.TimeZone.setDefault(java.util.TimeZone.getTimeZone("Asia/Seoul"));
+    }
+
     @Bean
     CommandLineRunner seed(UserRepository users, PasswordEncoder encoder) {
         return args -> {
@@ -32,7 +37,7 @@ public class EveryMomentApplication {
             if (users.findByEmail("demo@example.com").isEmpty()) {
                 users.save(UserEntity.builder()
                         .username("demo")
-                        .gender(1)  //성추가
+                        .gender(1) // 성추가
                         .email("demo@example.com")
                         .passwordHash(encoder.encode("Passw0rd!"))
                         .role("ROLE_USER")
