@@ -18,6 +18,14 @@
 - **Password**: `Passw0rd!`
 > **권한**: 일반 사용자 기능 (매칭, 설문 등)
 
+## 🛠️ 주요 이슈 해결 내역 (Troubleshooting)
+- **DB Connection**: TiDB 클라우드 연동 및 타임존 설정 완료
+- **CORS**: Vercel 프론트엔드 도메인 화이트리스팅 완료
+- **Match 500 Error**: `created_at` Null 문제 해결 및 설문 데이터 예외 처리 완료
+- **Timezone**: Asia/Seoul(KST) 기본 타임존 설정으로 시간 표기 오류 수정
+- **Null Handler**: MatchScorerService Integer null 처리로 NullPointerException 방지
+- **Auto Room Assignment**: 설문 층고 선호도 기반 자동 호실 배정 구현 (1층=101~, 2층=201~, 3층=301~)
+
 ---
 
 ## 📋 목차
