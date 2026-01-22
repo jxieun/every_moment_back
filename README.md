@@ -2,6 +2,24 @@
 
 사용자의 가치관 설문을 기반으로 최적의 인연을 연결하고, 실시간 소통과 커뮤니티 기능을 제공하는 Spring Boot 기반 매칭 플랫폼 백엔드 서버입니다.
 
+## 🚀 배포 주소 (Live URLs)
+- **Frontend**: [https://everymomentmini2front.vercel.app](https://everymomentmini2front.vercel.app)
+- **Backend API**: [https://every-moment-back.onrender.com](https://every-moment-back.onrender.com)
+- **Swagger Docs**: [https://every-moment-back.onrender.com/swagger-ui.html](https://every-moment-back.onrender.com/swagger-ui.html)
+
+## 🔑 관리자 및 테스트 계정 (Credentials)
+### 👑 관리자 (Admin)
+- **Email**: `admin@example.com`
+- **Password**: `AdminPassw0rd!`
+> **권한**: 채팅방 조회, 사용자 관리 등
+
+### 👤 테스트 유저 (Demo User)
+- **Email**: `demo@example.com`
+- **Password**: `Passw0rd!`
+> **권한**: 일반 사용자 기능 (매칭, 설문 등)
+
+---
+
 ## 📋 목차
 
 - [개요](#개요)
