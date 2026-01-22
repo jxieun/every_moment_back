@@ -82,21 +82,36 @@ public class MatchResultService {
         }
 
         // 3. 기존 결과가 없다면, 새로운 결과를 저장
-        SurveyResult userSurveyResult = surveyService.getSurveyResult(userId);
-        SurveyResult matchUserSurveyResult = surveyService.getSurveyResult(matchUserId);
+        try {
+            SurveyResult userSurveyResult = surveyService.getSurveyResult(userId);
+            SurveyResult matchUserSurveyResult = surveyService.getSurveyResult(matchUserId);
 
-        // 점수와 매칭 이유를 계산합니다.
-        MatchResultDTO calculatedResult = generateMatchReasons(userSurveyResult, matchUserSurveyResult);
+            // 점수와 매칭 이유를 계산합니다.
+            MatchResultDTO calculatedResult = generateMatchReasons(userSurveyResult, matchUserSurveyResult);
 
-        // 임시 룸 배정 정보
-        String roomAssignment = "방 번호를 입력해주세요";
-        String roommateName = "익명";
+            // 임시 룸 배정 정보
+            String roomAssignment = "방 번호를 입력해주세요";
+            String roommateName = "익명";
 
-        // 매칭 결과 저장
-        MatchResult matchResult = saveMatchResult(userId, matchUserId, calculatedResult.getPreferenceScore(), roomAssignment, roommateName, calculatedResult.getMatchReasons());
+            // 매칭 결과 저장
+            MatchResult matchResult = saveMatchResult(userId, matchUserId, calculatedResult.getPreferenceScore(),
+                    roomAssignment, roommateName, calculatedResult.getMatchReasons());
 
-        // 최종 DTO 반환
-        return toDtoFromEntity(matchResult);
+            // 최종 DTO 반환
+            return toDtoFromEntity(matchResult);
+
+        } catch (IllegalArgumentException e) {
+            // 설문 결과가 없는 경우 500 에러 대신 기본값 반환
+            return MatchResultDTO.builder()
+                    .userId(userId)
+                    .matchUserId(matchUserId)
+                    .preferenceScore(0.0)
+                    .matchReasons(Collections.singletonList("아직 설문이 완료되지 않아 분석할 수 없습니다."))
+                    .status("MATCHED")
+                    .roomAssignment("미배정")
+                    .roommateName("알 수 없음")
+                    .build();
+        }
     }
 
     // 매칭이유 상위 3개 생성 및 상위 3개 평균 결과값 반환(100점만점)
@@ -111,8 +126,13 @@ public class MatchResultService {
                 this.reason = reason;
             }
 
-            public BigDecimal getScore() { return score; }
-            public String getReason() { return reason; }
+            public BigDecimal getScore() {
+                return score;
+            }
+
+            public String getReason() {
+                return reason;
+            }
         }
 
         List<SimilarityResult> allSimilarities = new ArrayList<>();
@@ -125,7 +145,8 @@ public class MatchResultService {
                 calculateSimilarity(userSurveyResult.getCleanliness(), matchUserSurveyResult.getCleanliness(), 4.0),
                 "청결도 유사"));
         allSimilarities.add(new SimilarityResult(
-                calculateSimilarity(userSurveyResult.getNoiseSensitivity(), matchUserSurveyResult.getNoiseSensitivity(), 3.0),
+                calculateSimilarity(userSurveyResult.getNoiseSensitivity(), matchUserSurveyResult.getNoiseSensitivity(),
+                        3.0),
                 "소음 민감도 차이"));
         allSimilarities.add(new SimilarityResult(
                 calculateSimilarity(userSurveyResult.getHeight(), matchUserSurveyResult.getHeight(), 3.0),
@@ -161,7 +182,8 @@ public class MatchResultService {
     }
 
     // MatchResult 객체를 DB에 저장
-    private MatchResult saveMatchResult(Long userId, Long matchUserId, double score, String roomAssignment, String roommateName, List<String> matchReasons) {
+    private MatchResult saveMatchResult(Long userId, Long matchUserId, double score, String roomAssignment,
+            String roommateName, List<String> matchReasons) {
         List<Match> matches = matchRepository.findByUser1IdAndUser2Id(userId, matchUserId);
         if (matches.isEmpty()) {
             throw new IllegalArgumentException("매칭을 찾을 수 없습니다.");
@@ -188,14 +210,14 @@ public class MatchResultService {
                 .id(m.getId())
                 .roomAssignment(m.getRoomAssignment())
                 .roommateName(safeName(m.getRoommateName()))
-                .preferenceScore(m.getScore()!=null ? m.getScore().doubleValue() : null)
-                .matchReasons(m.getMatchReasons()!=null ? m.getMatchReasons() : Collections.emptyList())
-                .matchId(m.getMatch()!=null ? String.valueOf(m.getMatch().getId()) : "UNKNOWN")
+                .preferenceScore(m.getScore() != null ? m.getScore().doubleValue() : null)
+                .matchReasons(m.getMatchReasons() != null ? m.getMatchReasons() : Collections.emptyList())
+                .matchId(m.getMatch() != null ? String.valueOf(m.getMatch().getId()) : "UNKNOWN")
                 .status(safeStatus(m.getStatus()))
-                .userId(m.getUser()!=null ? m.getUser().getId() : null)
-                .matchUserId(m.getMatchUser()!=null ? m.getMatchUser().getId() : null)
-                .userName(m.getUser()!=null ? safeName(m.getUser().getUsername()) : null)
-                .matchUserName(m.getMatchUser()!=null ? safeName(m.getMatchUser().getUsername()) : null)
+                .userId(m.getUser() != null ? m.getUser().getId() : null)
+                .matchUserId(m.getMatchUser() != null ? m.getMatchUser().getId() : null)
+                .userName(m.getUser() != null ? safeName(m.getUser().getUsername()) : null)
+                .matchUserName(m.getMatchUser() != null ? safeName(m.getMatchUser().getUsername()) : null)
                 .build();
     }
 
@@ -207,7 +229,9 @@ public class MatchResultService {
                 .setScale(2, RoundingMode.HALF_UP);
     }
 
-    private String safeName(String s){ return (s!=null && !s.isBlank()) ? s : "익명"; }
+    private String safeName(String s) {
+        return (s != null && !s.isBlank()) ? s : "익명";
+    }
 
     private String safeStatus(MatchStatus status) {
         return status != null ? status.name() : "PENDING";
