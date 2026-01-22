@@ -103,6 +103,27 @@ com.rookies4.every_moment/
 * **JWT 아키텍처**: Access/Refresh 토큰 구조를 통해 보안성이 강화된 인증 시스템을 구축했습니다.
 * **권한 관리**: Spring Security를 활용하여 비인가 사용자의 민감 데이터 접근을 차단합니다.
 
+### 🔄 스왑(SWAP) 시스템 (Roommate Swap)
+기존 룸메이트와 맞지 않아 변경을 원하는 사용자를 위한 기능입니다.
+
+**동작 방식:**
+1. **스왑 신청**: 사용자가 게시판(FIND 카테고리)에 `status: SWAP_REQUEST`로 게시글 작성
+2. **관리자 검토**: 관리자가 신청 내용을 확인하고 승인/거절 결정
+3. **상태 변경**:
+   - **승인**: `SWAP_APPROVED` → 다른 사용자와 새로운 매칭 가능
+   - **거절**: `SWAP_REJECTED` → 기존 룸메이트 유지
+4. **재매칭**: 승인된 사용자는 설문 결과를 기반으로 새로운 룸메이트를 매칭받을 수 있음
+
+**상태값:**
+- `NORMAL`: 일반 게시글
+- `SWAP_REQUEST`: 스왑 신청 대기 중
+- `SWAP_APPROVED`: 관리자 승인 완료
+- `SWAP_REJECTED`: 관리자 거절
+
+**API 엔드포인트:**
+- `POST /api/posts/{id}/approve`: 관리자 승인
+- `POST /api/posts/{id}/reject`: 관리자 거절
+
 ---
 
 ## 🔗 API 엔드포인트
