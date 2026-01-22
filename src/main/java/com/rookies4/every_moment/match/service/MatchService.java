@@ -137,6 +137,10 @@ public class MatchService {
             if (match.getStatus().equals(MatchStatus.PENDING)) {
                 // 매칭 상태를 ACCEPTED로 변경
                 match.setStatus(MatchStatus.ACCEPTED);
+
+                // 🔥 자동 호실 배정
+                assignRoomNumber(match.getUser1(), match.getUser2());
+
                 matchRepository.save(match);
             } else {
                 throw new IllegalArgumentException("매칭을 찾을 수 없거나 이미 수락된 상태입니다.");
@@ -258,5 +262,28 @@ public class MatchService {
         defaultSurvey.setHeight(0);
         defaultSurvey.setRoomTemp(0);
         return defaultSurvey;
+    }
+
+    /**
+     * 자동 호실 배정: 101호부터 순차적으로 배정
+     */
+    private void assignRoomNumber(UserEntity user1, UserEntity user2) {
+        // 이미 호실이 있으면 패스
+        if (user1.getRoomNumber() != null && user2.getRoomNumber() != null) {
+            return;
+        }
+
+        // 현재 가장 큰 호실 번호 조회
+        Integer maxRoomNum = userRepository.findMaxRoomNumber();
+        int nextRoomNum = (maxRoomNum == null) ? 101 : maxRoomNum + 1;
+
+        String roomNumber = String.valueOf(nextRoomNum);
+
+        // 두 유저에게 같은 호실 배정
+        user1.setRoomNumber(roomNumber);
+        user2.setRoomNumber(roomNumber);
+
+        userRepository.save(user1);
+        userRepository.save(user2);
     }
 }

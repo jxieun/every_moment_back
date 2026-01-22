@@ -206,9 +206,17 @@ public class MatchResultService {
 
     // ===== 내부 헬퍼 =====
     private MatchResultDTO toDtoFromEntity(MatchResult m) {
+        // 🔥 실제 배정된 호실 번호 사용
+        String roomNum = null;
+        if (m.getUser() != null && m.getUser().getRoomNumber() != null) {
+            roomNum = m.getUser().getRoomNumber() + "호";
+        } else if (m.getMatchUser() != null && m.getMatchUser().getRoomNumber() != null) {
+            roomNum = m.getMatchUser().getRoomNumber() + "호";
+        }
+
         return MatchResultDTO.builder()
                 .id(m.getId())
-                .roomAssignment(m.getRoomAssignment())
+                .roomAssignment(roomNum) // DB의 roomAssignment 대신 User의 roomNumber 사용
                 .roommateName(safeName(m.getRoommateName()))
                 .preferenceScore(m.getScore() != null ? m.getScore().doubleValue() : null)
                 .matchReasons(m.getMatchReasons() != null ? m.getMatchReasons() : Collections.emptyList())

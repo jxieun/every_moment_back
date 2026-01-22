@@ -46,6 +46,9 @@ public class UserEntity {
         @Column(nullable = false)
         private Boolean active;
 
+        @Column(name = "room_number", length = 10)
+        private String roomNumber; // 자동 배정되는 호실 (예: "101", "102")
+
         // 사용자 Preference 관계 (1:1 관계, nullable 설정)
         @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
         @JoinColumn(name = "preference_id", nullable = true) // 외래 키를 설정하고, null 허용
