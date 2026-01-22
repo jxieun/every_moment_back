@@ -15,9 +15,11 @@ public class CorsConfig {
         // Add ws/wss schemes for WebSocket support
         cfg.setAllowedOrigins(List.of(
                 "http://localhost:3000",
-                "http://localhost:5173"
-        ));
-        cfg.setAllowedMethods(List.of("GET","POST","PUT","DELETE","PATCH","OPTIONS"));
+                "http://localhost:5173",
+                "https://everymomentmini2front.vercel.app",
+                "https://everymomentmini2front.vercel.app",
+                "https://*.vercel.app"));
+        cfg.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
         cfg.setAllowedHeaders(List.of("*"));
         cfg.setExposedHeaders(List.of("Authorization", "Location"));
         cfg.setAllowCredentials(true);
