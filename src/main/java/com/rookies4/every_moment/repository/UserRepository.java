@@ -21,4 +21,9 @@ public interface UserRepository extends JpaRepository<UserEntity, Long> {
     Integer findMaxRoomNumber();
 
     boolean existsByRoomNumber(String roomNumber);
+
+    // 특정 층(범위) 내에서 가장 큰 호실 번호 조회
+    @org.springframework.data.jpa.repository.Query("SELECT MAX(CAST(u.roomNumber AS int)) FROM UserEntity u WHERE u.roomNumber IS NOT NULL AND CAST(u.roomNumber AS int) BETWEEN :start AND :end")
+    Integer findMaxRoomNumberInRange(@org.springframework.data.repository.query.Param("start") int start,
+            @org.springframework.data.repository.query.Param("end") int end);
 }

@@ -265,7 +265,8 @@ public class MatchService {
     }
 
     /**
-     * 자동 호실 배정: 101호부터 순차적으로 배정
+     * 자동 호실 배정: 설문의 층고 선호도에 따라 층 결정 후 순차 배정
+     * height: 1(저층)=1층, 2(중간)=2층, 3(고층)=3층
      */
     private void assignRoomNumber(UserEntity user1, UserEntity user2) {
         // 이미 호실이 있으면 패스
@@ -273,11 +274,11 @@ public class MatchService {
             return;
         }
 
-        // 현재 가장 큰 호실 번호 조회
-        Integer maxRoomNum = userRepository.findMaxRoomNumber();
-        int nextRoomNum = (maxRoomNum == null) ? 101 : maxRoomNum + 1;
+        // 두 유저의 설문 조회하여 층고 선호도 확인
+        Integer preferredFloor = determinePreferredFloor(user1, user2);
 
-        String roomNumber = String.valueOf(nextRoomNum);
+        // 해당 층에서 다음 호실 번호 찾기
+        String roomNumber = findNextRoomInFloor(preferredFloor);
 
         // 두 유저에게 같은 호실 배정
         user1.setRoomNumber(roomNumber);
@@ -285,5 +286,66 @@ public class MatchService {
 
         userRepository.save(user1);
         userRepository.save(user2);
+    }
+
+    /**
+     * 두 유저의 층고 선호도를 기반으로 배정할 층 결정
+     * 두 사람의 선호가 같으면 그 층, 다르면 평균 층 사용
+     */
+    private Integer determinePreferredFloor(UserEntity user1, UserEntity user2) {
+        try {
+            SurveyResult survey1 = surveyResultRepository.findByUserId(user1.getId())
+                    .orElseGet(() -> createDefaultSurveyResult(user1));
+            SurveyResult survey2 = surveyResultRepository.findByUserId(user2.getId())
+                    .orElseGet(() -> createDefaultSurveyResult(user2));
+
+            Integer height1 = survey1.getHeight(); // 1, 2, 3
+            Integer height2 = survey2.getHeight();
+
+            // 둘 다 값이 있으면 평균 (반올림)
+            if (height1 != null && height2 != null) {
+                return Math.round((height1 + height2) / 2.0f);
+            }
+            // 하나만 있으면 그 값 사용
+            if (height1 != null)
+                return height1;
+            if (height2 != null)
+                return height2;
+
+        } catch (Exception e) {
+            // 설문이 없거나 오류 시 기본값
+        }
+
+        // 기본값: 1층
+        return 1;
+    }
+
+    /**
+     * 특정 층에서 다음 빈 호실 번호 찾기
+     * 예: 1층 → 101, 102, 103... / 2층 → 201, 202, 203...
+     */
+    private String findNextRoomInFloor(Integer floor) {
+        // 해당 층의 시작 번호와 끝 번호 계산
+        int floorStart = floor * 100 + 1; // 101, 201, 301
+        int floorEnd = floor * 100 + 99; // 199, 299, 399
+
+        // 해당 층 범위 내에서 가장 큰 호실 번호 조회
+        Integer maxInFloor = userRepository.findMaxRoomNumberInRange(floorStart, floorEnd);
+
+        int nextRoomNum;
+        if (maxInFloor == null) {
+            // 해당 층에 아직 배정된 호실이 없음 → 01호부터 시작
+            nextRoomNum = floorStart;
+        } else {
+            // 다음 호실 번호
+            nextRoomNum = maxInFloor + 1;
+
+            // 층 범위를 벗어나면 다시 01호로
+            if (nextRoomNum > floorEnd) {
+                nextRoomNum = floorStart;
+            }
+        }
+
+        return String.valueOf(nextRoomNum);
     }
 }
