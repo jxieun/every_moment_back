@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: every-moment-back
+    env: docker
+    plan: free
+    region: singapore # or ohio, frankfurt, oregon
+    branch: main # or master, depending on your branch name
+    envVars:
+      - key: PORT
+        value: 8080
+      - key: SPRING_PROFILES_ACTIVE
+        value: prod
