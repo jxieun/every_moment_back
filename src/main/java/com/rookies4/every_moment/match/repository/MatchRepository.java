@@ -15,6 +15,7 @@ import java.util.Optional;
 public interface MatchRepository extends JpaRepository<Match, Long> {
     // 특정 사용자와 매칭된 모든 매칭 조회
     List<Match> findByUser1_Id(Long userId);
+
     List<Match> findByUser2_Id(Long userId);
 
     // 매칭 상태로 조회 (예: PENDING, ACCEPTED)
@@ -40,9 +41,15 @@ public interface MatchRepository extends JpaRepository<Match, Long> {
 
     // 사용자 1이 매칭된 상태인지 확인하는 메서드 (ACCEPTED 상태)
     @Query("SELECT COUNT(m) > 0 FROM Match m WHERE m.user1.id = :targetUserId AND m.status = :matchStatus")
-    boolean existsByUser1AndStatus(@Param("targetUserId") Long targetUserId, @Param("matchStatus") MatchStatus matchStatus);
+    boolean existsByUser1AndStatus(@Param("targetUserId") Long targetUserId,
+            @Param("matchStatus") MatchStatus matchStatus);
 
     // 사용자 2가 매칭된 상태인지 확인하는 메서드 (ACCEPTED 상태)
     @Query("SELECT COUNT(m) > 0 FROM Match m WHERE m.user2.id = :targetUserId AND m.status = :matchStatus")
-    boolean existsByUser2AndStatus(@Param("targetUserId") Long targetUserId, @Param("matchStatus") MatchStatus matchStatus);
+    boolean existsByUser2AndStatus(@Param("targetUserId") Long targetUserId,
+            @Param("matchStatus") MatchStatus matchStatus);
+
+    // 사용자(user1 또는 user2)와 상태로 매칭 조회
+    @Query("SELECT m FROM Match m WHERE (m.user1 = :user OR m.user2 = :user) AND m.status = :status")
+    List<Match> findByUserAndStatus(@Param("user") UserEntity user, @Param("status") MatchStatus status);
 }
