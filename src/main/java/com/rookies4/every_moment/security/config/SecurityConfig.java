@@ -66,6 +66,14 @@ public class SecurityConfig {
         @Bean
         public org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer webSecurityCustomizer() {
                 return (web) -> web.ignoring()
-                                .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html");
+                                .requestMatchers(
+                                                "/v3/api-docs/**",
+                                                "/swagger-ui/**",
+                                                "/swagger-ui.html",
+                                                "/swagger-resources/**",
+                                                "/webjars/**",
+                                                "/api/school/auth/**" // Auth endpoints also ignored from security chain
+                                                                      // for safety
+                                );
         }
 }
