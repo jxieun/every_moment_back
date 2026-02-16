@@ -1,6 +1,5 @@
 package com.rookies4.every_moment.security.config;
 
-
 import com.rookies4.every_moment.security.CustomAccessDeniedHandler;
 import com.rookies4.every_moment.security.jwt.JwtAuthenticationEntryPoint;
 import com.rookies4.every_moment.security.jwt.JwtAuthenticationFilter;
@@ -23,42 +22,44 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @RequiredArgsConstructor
 public class SecurityConfig {
 
-    private final JwtAuthenticationFilter jwtFilter;
-    private final JwtAuthenticationEntryPoint entryPoint;
-    private final CustomAccessDeniedHandler deniedHandler;
+        private final JwtAuthenticationFilter jwtFilter;
+        private final JwtAuthenticationEntryPoint entryPoint;
+        private final CustomAccessDeniedHandler deniedHandler;
 
-    @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http
-                .csrf(csrf -> csrf.disable())
-                .cors(Customizer.withDefaults())
-                .sessionManagement(sm ->
-                        sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .exceptionHandling(eh -> eh
-                        .authenticationEntryPoint(entryPoint)
-                        .accessDeniedHandler(deniedHandler))
-                .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(
-                                "/api/school/auth/**",
-                                "/v3/api-docs/**", "/swagger-ui/**",
-                                "/actuator/health",
-                                "/api/survey/submit/**", "/api/preferences/**", "/api/match/**",
-                                "/api/match/recommendation/**",
-                                "/api/match/result/**"
-                        ).permitAll()
-                        .anyRequest().authenticated())
-                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
+        @Bean
+        public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+                http
+                                .csrf(csrf -> csrf.disable())
+                                .cors(Customizer.withDefaults())
+                                .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                                .exceptionHandling(eh -> eh
+                                                .authenticationEntryPoint(entryPoint)
+                                                .accessDeniedHandler(deniedHandler))
+                                .authorizeHttpRequests(auth -> auth
+                                                .requestMatchers(
+                                                                "/api/school/auth/**",
+                                                                "/actuator/health",
+                                                                "/api/survey/submit/**", "/api/preferences/**",
+                                                                "/api/match/**",
+                                                                "/api/match/recommendation/**",
+                                                                "/api/match/result/**")
+                                                .permitAll()
+                                                .requestMatchers("/v3/api-docs/**", "/swagger-ui/**",
+                                                                "/swagger-ui.html")
+                                                .permitAll()
+                                                .anyRequest().authenticated())
+                                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
-        return http.build();
-    }
+                return http.build();
+        }
 
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
+        @Bean
+        public PasswordEncoder passwordEncoder() {
+                return new BCryptPasswordEncoder();
+        }
 
-    @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration cfg) throws Exception {
-        return cfg.getAuthenticationManager();
-    }
+        @Bean
+        public AuthenticationManager authenticationManager(AuthenticationConfiguration cfg) throws Exception {
+                return cfg.getAuthenticationManager();
+        }
 }
