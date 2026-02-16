@@ -12,7 +12,6 @@ import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -31,9 +30,7 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-
                 .csrf(csrf -> csrf.disable())
-                .headers(headers -> headers.frameOptions(frameOptions -> frameOptions.disable()))
                 .cors(Customizer.withDefaults())
                 .sessionManagement(sm ->
                         sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
@@ -44,8 +41,8 @@ public class SecurityConfig {
                         .requestMatchers(
                                 "/api/school/auth/**",
                                 "/v3/api-docs/**", "/swagger-ui/**",
-                                "/actuator/health","/ws/**","/ws","/api/chat/**",
-                                "/topic/**","/queue/**","/ws/info/**","/room/**","/api/school/**","/api/survey/submit/**", "/api/preferences/**", "/api/match/**",
+                                "/actuator/health",
+                                "/api/survey/submit/**", "/api/preferences/**", "/api/match/**",
                                 "/api/match/recommendation/**",
                                 "/api/match/result/**"
                         ).permitAll()

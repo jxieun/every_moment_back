@@ -17,8 +17,8 @@ public class SurveyController {
     private final SurveyService surveyService;
     private final PreferenceService preferenceService;
 
+
     // 설문지 제출 및 선호도 계산 후 저장
-    // @CrossOrigin(origins = "http://localhost:5173")
     @PostMapping("/submit/{userId}")
     public ResponseEntity<SurveyResult> submitSurvey(@PathVariable Long userId, @RequestBody SurveyResult surveyResult) {
         if (userId == null) {
@@ -41,29 +41,23 @@ public class SurveyController {
         }
     }
 
+
     // 설문 결과 조회
     @GetMapping("/{userId}")
     public ResponseEntity<SurveyResultResponseDTO> getSurveyResult(@PathVariable Long userId) {
-        try {
-            // 기존 설문 결과 조회
-            SurveyResult surveyResult = surveyService.getSurveyResult(userId);
+        SurveyResult surveyResult = surveyService.getSurveyResult(userId);
 
-            // DTO 변환
-            SurveyResultResponseDTO response = new SurveyResultResponseDTO(
-                    surveyResult.getId(),
-                    surveyResult.getUser().getId(), // user 정보 사용
-                    surveyResult.getSleepTime(),
-                    surveyResult.getCleanliness(),
-                    surveyResult.getNoiseSensitivity(),
-                    surveyResult.getHeight(),
-                    surveyResult.getRoomTemp()
-            );
+        // DTO 변환
+        SurveyResultResponseDTO response = new SurveyResultResponseDTO(
+                surveyResult.getId(),
+                surveyResult.getUser().getId(), // user 정보 사용
+                surveyResult.getSleepTime(),
+                surveyResult.getCleanliness(),
+                surveyResult.getNoiseSensitivity(),
+                surveyResult.getHeight(),
+                surveyResult.getRoomTemp()
+        );
 
-            return ResponseEntity.ok(response);
-        } catch (IllegalArgumentException e) {
-            // 설문 결과가 없으면 null을 반환하여 404를 피함
-            return ResponseEntity.ok(null);  // 설문이 없으면 null 반환
-        }
+        return ResponseEntity.ok(response);
     }
-
 }
