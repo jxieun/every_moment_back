@@ -13,11 +13,10 @@ public class CorsConfig {
     CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration cfg = new CorsConfiguration();
         // Add ws/wss schemes for WebSocket support
-        cfg.setAllowedOrigins(List.of(
+        // Use patterns to allow all Vercel domains and local development
+        cfg.setAllowedOriginPatterns(List.of(
                 "http://localhost:3000",
                 "http://localhost:5173",
-                "https://everymomentmini2front.vercel.app",
-                "https://everymomentmini2front.vercel.app",
                 "https://*.vercel.app"));
         cfg.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
         cfg.setAllowedHeaders(List.of("*"));
